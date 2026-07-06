@@ -1,0 +1,61 @@
+if [ -n "$ZSH_VERSION" ]; then
+    _CC_DIR="${${(%):-%x}:A:h}"
+else
+    _CC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+
+# Refuse to mount an overly broad directory (home or filesystem root).
+_cc_guard() {
+    local here="$(pwd)"
+    if [ "$here" = "$HOME" ] || [ "$here" = "/" ]; then
+        echo "refusing to mount $here — cd into a project directory first" >&2
+        return 1
+    fi
+}
+
+_cc_env() {
+    if [ ! -f "$1" ]; then
+        echo "missing $1 (copy the matching .env.example and add your key)" >&2
+        return 1
+    fi
+}
+
+# Isolation: no extra capabilities, no privilege escalation, only /work and
+# the agent's config dir are writable, host gitconfig is read-only.
+_CC_HARDEN=(--init --cap-drop ALL --security-opt no-new-privileges)
+
+copencode() {
+    _cc_guard || return 1
+    _cc_env "$_CC_DIR/opencode.env" || return 1
+    local git_args=()
+    [ -f "$HOME/.gitconfig" ] && git_args=(-v "$HOME/.gitconfig:/gitconfig:ro" -e GIT_CONFIG_GLOBAL=/gitconfig)
+    docker run "${_CC_HARDEN[@]}" -it --rm \
+        -v "$(pwd):/work" -w /work \
+        "${git_args[@]}" \
+        --env-file "$_CC_DIR/opencode.env" \
+        opencode "$@"
+}
+
+cclaude() {
+    _cc_guard || return 1
+    mkdir -p "$_CC_DIR/.claude-home"
+    local git_args=()
+    [ -f "$HOME/.gitconfig" ] && git_args=(-v "$HOME/.gitconfig:/gitconfig:ro" -e GIT_CONFIG_GLOBAL=/gitconfig)
+    docker run "${_CC_HARDEN[@]}" -it --rm \
+        -v "$(pwd):/work" -w /work \
+        -v "$_CC_DIR/.claude-home:/config" \
+        "${git_args[@]}" \
+        claude-code --dangerously-skip-permissions "$@"
+}
+
+ccodex() {
+    _cc_guard || return 1
+    mkdir -p "$_CC_DIR/.codex-home"
+    local git_args=()
+    [ -f "$HOME/.gitconfig" ] && git_args=(-v "$HOME/.gitconfig:/gitconfig:ro" -e GIT_CONFIG_GLOBAL=/gitconfig)
+    docker run "${_CC_HARDEN[@]}" -it --rm \
+        -v "$(pwd):/work" -w /work \
+        -v "$_CC_DIR/.codex-home:/config" \
+        "${git_args[@]}" \
+        codex --dangerously-bypass-approvals-and-sandbox "$@"
+}

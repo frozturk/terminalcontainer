@@ -1,0 +1,11 @@
+FROM agent-base
+
+RUN npm install -g @anthropic-ai/claude-code
+
+ENV CLAUDE_CONFIG_DIR=/config
+RUN mkdir -p /config && chown node:node /config
+
+USER node
+WORKDIR /work
+
+ENTRYPOINT ["claude"]

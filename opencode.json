@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "neuralwatt/glm-5.2",
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "webfetch": "allow"
+  },
+  "provider": {
+    "neuralwatt": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Neuralwatt",
+      "options": {
+        "baseURL": "https://api.neuralwatt.com/v1",
+        "apiKey": "{env:OPENCODE_API_KEY}"
+      },
+      "models": {
+        "glm-5.2": {}
+      }
+    }
+  }
+}

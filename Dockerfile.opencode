@@ -1,0 +1,9 @@
+FROM agent-base
+
+RUN npm install -g opencode-ai
+
+COPY opencode.json /root/.config/opencode/opencode.json
+
+WORKDIR /work
+
+ENTRYPOINT ["opencode"]

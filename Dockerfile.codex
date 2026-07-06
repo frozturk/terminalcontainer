@@ -1,0 +1,11 @@
+FROM agent-base
+
+RUN npm install -g @openai/codex
+
+ENV CODEX_HOME=/config
+RUN mkdir -p /config && chown node:node /config
+
+USER node
+WORKDIR /work
+
+ENTRYPOINT ["codex"]
