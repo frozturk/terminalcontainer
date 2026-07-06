@@ -3,6 +3,7 @@ FROM agent-base
 RUN npm install -g opencode-ai
 
 COPY opencode.json /root/.config/opencode/opencode.json
+COPY opencode-rules.md /etc/opencode/rules.md
 
 WORKDIR /work
 
