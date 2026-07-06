@@ -49,6 +49,19 @@ ccodex        # Codex — log in on first run
 - **Claude Code / Codex**: normal interactive login, persisted in gitignored local
   dirs (`.claude-home/`, `.codex-home/`) so you log in once.
 
+  _Alternative — seed from an existing host login:_ instead of logging in inside
+  the container, copy your host credentials into the mounted config dirs. The
+  container points each CLI at `/config` (`CLAUDE_CONFIG_DIR` / `CODEX_HOME`),
+  which maps to these dirs:
+  ```sh
+  mkdir -p .claude-home && cp -a ~/.claude/. .claude-home/   # Claude Code
+  mkdir -p .codex-home  && cp -a ~/.codex/.  .codex-home/    # Codex
+  ```
+  Then run `cclaude` / `ccodex` and you're already logged in. Note: on macOS
+  Claude Code may store its token in the Keychain rather than in `~/.claude`, in
+  which case copying the files won't carry the login — use the interactive login
+  above instead.
+
 ## Permissions
 
 Agents run fully autonomous inside the container (the container is the sandbox):
